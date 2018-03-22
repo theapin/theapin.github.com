@@ -1,20 +1,20 @@
 function Planet(name,index){
-  this.name=name;
-  this.element=J.id(name);
-  this.index=index;
-  this.track=S(".track."+name);
-  this.deg=Jet.getRandom(0,359);
-  this.speed=Jet.getRandom(1,6);
-  this.len=Jet.getRandom(80,100)*rate;
-  this.a=this.track.offsetWidth/2;
-  this.b=this.track.offsetHeight/2;
-  this.r=this.len/2;
-  this.isStop=false;
-  this.isFront=false;
-  this.x=0;
-  this.y=0;
+  this.name=name;//名字
+  this.element=J.id(name);//对应的html元素
+  this.index=index;//z-index值
+  this.track=S(".track."+name);//轨道对应的html元素
+  this.deg=Jet.getRandom(0,359);//当前行星所在的角度， 初始 0-359 度随机一个 
+  this.speed=Jet.getRandom(1,6);//行星的速度
+  this.len=Jet.getRandom(80,100)*rate;//行星的直径
+  this.a=this.track.offsetWidth/2;//椭圆的参数a
+  this.b=this.track.offsetHeight/2;//椭圆的参数b
+  this.r=this.len/2;//行星半径
+  this.isStop=false;//是否停止 ，用于鼠标移上去，行星停止运动
+  this.isFront=false;//是否在中心星球的前面，用于设置z-index的值
+  this.x=0;//行星的x坐标
+  this.y=0;//行星的y坐标
   this.init();
-};Planet.prototype.t_deg=-16;
+};Planet.prototype.t_deg=-16;//轨道的偏转角度
 Planet.prototype.resize=function(){
   this.len=Jet.getRandom(80,100)*rate;
   this.a=this.track.offsetWidth/2;

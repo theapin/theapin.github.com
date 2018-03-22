@@ -1,15 +1,17 @@
-var height,width,cx,cy;
-var origin;
-var planets=[];
-var floats=[];
-var t_height=180;
-var t_d=90;
-var rate;
-var o_len=150;
+var height,width,cx,cy;//屏幕高度，屏幕宽度，屏幕中心点的x，y坐标
+//屏幕坐标系是左上角为 （0，0），右下角是（width，height）
+var origin;//不能动的中心星球
+var planets=[];//能动的行星数组
+var floats=[];//这个不用管，这是works页面的，这里没有用到
+var t_height=180;//最内圈轨道的高度的默认高度，（根据这个与rate和 t_d 计算其他轨道高度与间距）
+//轨道宽度是高度两倍
+var t_d=90;//轨道的间距
+var rate;//页面缩放的比例，（当前宽高与(1200,700)的比例）
+var o_len=150;//中心球的直径
 //1200 700
-var t;
-var planetNum=5;
-var names=["resume","music","image","video","work"];
+var t;//这里没有用到
+var planetNum=5;//可移动的行星数量
+var names=["resume","music","image","video","work"];//可移动的行星名字
 J.load(function(){
   setSize();
   names.each(function(item,i){

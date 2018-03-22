@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!--<script src="qrcode.js"></script>-->
+    <script type="text/javascript" src="scansrc/grid.js"></script>
+<script type="text/javascript" src="scansrc/version.js"></script>
+<script type="text/javascript" src="scansrc/detector.js"></script>
+<script type="text/javascript" src="scansrc/formatinf.js"></script>
+<script type="text/javascript" src="scansrc/errorlevel.js"></script>
+<script type="text/javascript" src="scansrc/bitmat.js"></script>
+<script type="text/javascript" src="scansrc/datablock.js"></script>
+<script type="text/javascript" src="scansrc/bmparser.js"></script>
+<script type="text/javascript" src="scansrc/datamask.js"></script>
+<script type="text/javascript" src="scansrc/rsdecoder.js"></script>
+<script type="text/javascript" src="scansrc/gf256poly.js"></script>
+<script type="text/javascript" src="scansrc/gf256.js"></script>
+<script type="text/javascript" src="scansrc/decoder.js"></script>
+<script type="text/javascript" src="scansrc/qrcode.self.js"></script>
+<script type="text/javascript" src="scansrc/findpat.js"></script>
+<script type="text/javascript" src="scansrc/alignpat.js"></script>
+<script type="text/javascript" src="scansrc/databr.js"></script>
+    <style>
+        #qrcode{
+            /*text-align: center;*/
+            /*display: table-cell;*/
+            /*width: 96px;*/
+            /*height: 96px;*/
+            /*vertical-align:middle;*/
+            /*position: relative;*/
+        }
+        #widnow{
+          width:320px;
+          height:320px;
+          margin:0 auto;
+          overflow:hidden;
+        }
+    </style>
+</head>
+<body>
+<!--<div id="qrcode">
+</div>
+
+<input type="text" id="getval"/> <button id="send">点击更换验证码</button><br />
+
+
+<input type="file" id="file" accept="image/*" name="file" onchange="adecode()">
+<div id='result'></div> 
+<img src="" id='show' style='width:300px;' alt="" />-->
+<div>
+<button id='snap'>截图</button>
+<button id='close'>关闭</button>
+<button id='upload'>打印</button>
+<button id='scan'>扫码</button>
+</div>
+<div id='result'></div> 
+<div id='widnow'>
+  <video id='video'  style='width:320px'></video>
+</div>
+<canvas id='canvas' style=''></canvas>
+<script>
+/*var qrcode;
+    window.onload =function(){
+         qrcode= new QRCode(document.getElementById("qrcode"), {
+            width : 96,//设置宽高
+            height : 96
+        });
+        qrcode.makeCode("http://www.baidu.com");
+        document.getElementById("send").onclick =function(){
+            qrcode.makeCode(document.getElementById("getval").value);
+        }
+    }*/
+    function $(elem) {
+      return document.getElementById(elem);
+    }
+   
+    // 获取媒体方法（旧方法）
+    navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMeddia || navigator.msGetUserMedia;
+   
+    var canvas = $('canvas');
+  canvas.width=320;
+  canvas.height=320;
+      var context = canvas.getContext('2d'),
+      video = $('video'),
+      snap = $('snap'),
+      close = $('close'),
+      scan=$('scan'),
+      upload=$('upload'),
+      mediaStreamTrack;
+   var timer;
+    var exArray = []; //存储设备源ID
+    if(typeof MediaStreamTrack!=='undefined'){
+      MediaStreamTrack.getSources(function (sourceInfos) {
+        initAll(sourceInfos);
+      })
+    }else if(typeof navigator.mediaDevices!=='undefined'&&typeof navigator.mediaDevices.enumerateDevices!=='undefined'){
+      navigator.mediaDevices.enumerateDevices().then(function(info){initAll(info)})
+    }else if(typeof navigator.getMedia!=='undefined'){
+      navigator.getMedia.enumerateDevices().then(function(info){initAll(info)})
+    }
+    var initAll=function(sourceInfos){
+        for (var i = 0; i != sourceInfos.length; ++i) {
+            var sourceInfo = sourceInfos[i];
+            //这里会遍历audio,video，所以要加以区分
+            if (sourceInfo.kind === 'video') {
+                exArray.push(sourceInfo.id);
+            }
+        }
+        
+        //alert(sourceInfos);
+        
+        
+    // 获取媒体方法（新方法）
+    // 使用新方法打开摄像头
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        video:  {  
+            /*mandatory: { 
+              minAspectRatio: 1.40, 
+              maxAspectRatio: 1.78, 
+              minFrameRate: 15, 
+              maxFrameRate: 25, 
+              minWidth: 1280, 
+              minHeight: 720 
+            },*/
+
+            'optional': [{  
+                'sourceId': exArray[1] //0为前置摄像头，1为后置  
+            }]  
+        }, 
+        audio: false
+      }).then(function(stream) {
+        console.log(stream);
+   
+        mediaStreamTrack = typeof stream.stop === 'function' ? stream : stream.getTracks()[1];
+        
+        video.src = (window.URL || window.webkitURL).createObjectURL(stream);
+        
+        video.play();
+        
+      }).catch(function(err) {
+        console.log(err);
+      })
+    }
+    // 使用旧方法打开摄像头
+    else if (navigator.getMedia) {
+      navigator.getMedia({
+        video: {  
+            /*mandatory: { 
+              minAspectRatio: 1.40, 
+              maxAspectRatio: 1.78, 
+              minFrameRate: 15, 
+              maxFrameRate: 25, 
+              minWidth: 1280, 
+              minHeight: 720 
+            },*/
+            'optional': [{  
+                'sourceId': exArray[1] //0为前置摄像头，1为后置  
+            }]  
+        }, 
+      }, function(stream) {
+        mediaStreamTrack = stream.getTracks()[0];
+        
+        video.src = (window.URL || window.webkitURL).createObjectURL(stream);
+        video.play();
+        
+      }, function(err) {
+        alert(err);
+      });
+    }
+    
+        
+        
+    };
+    
+    
+    
+    // 截取图像
+    snap.addEventListener('click', function() {
+      context.drawImage(video, 0, 0,video.offsetWidth,video.offsetHeight);
+    }, false);
+   
+    // 关闭摄像头
+    close.addEventListener('click', function() {
+      mediaStreamTrack && mediaStreamTrack.stop();
+    }, false);
+   
+    // 上传截取的图像
+    upload.addEventListener('click', function() {
+      alert(canvas.toDataURL('image/png'));
+    }, false);
+    
+    scan.onclick=function() {
+      qrcode.callback=function(res){
+        if(res!="error decoding QR Code"){
+          $('result').innerText=res;
+          close.click();
+          alert('success');
+        }else{
+          decodeCheck();
+        }
+      }
+      decodeCheck();
+      scan.onclick=null;
+    }
+  function decodeCheck(){
+    context.drawImage(video, 0, 0,video.offsetWidth,video.offsetHeight);
+    qrcode.decode(canvas.toDataURL('image/png'));
+  }
+    function adecode(){
+      var reads= new FileReader();
+      var f=document.getElementById('file').files[0];
+      reads.readAsDataURL(f);
+      reads.onload=function (e) {
+        qrcode.decode(this.result);
+        document.getElementById('show').src=this.result;
+      };
+    }
+
+
+</script>
+</body>
+</html>
